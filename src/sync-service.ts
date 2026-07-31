@@ -30,14 +30,14 @@ export class SyncService {
       const effectiveChannelId = isRootSync ? "vault-root" : sub.localChannelId;
       const contentRoot = isRootSync ? "" : sub.localPath;
 
-      await this.ensureLocalChannel(effectiveChannelId, contentRoot);
-      console.log("[res-sync] subscription:", sub.serverChannelId, "→", effectiveChannelId,
+      const actualChannelId = await this.ensureLocalChannel(effectiveChannelId, contentRoot);
+      console.log("[res-sync] subscription:", sub.serverChannelId, "→", actualChannelId,
         isRootSync ? "(vault root)" : "");
 
       const client = new SyncClient(this.reservoirDir, {
         serverUrl,
         serverChannelId: sub.serverChannelId,
-        localChannelId: effectiveChannelId,
+        localChannelId: actualChannelId,
         secret,
       });
 
@@ -72,16 +72,17 @@ export class SyncService {
     }));
   }
 
-  private async ensureLocalChannel(channelId: string, contentRoot?: string): Promise<void> {
+  private async ensureLocalChannel(channelId: string, contentRoot?: string): Promise<string> {
     try {
-      this.channelController.viewChannel(channelId);
+      return this.channelController.viewChannel(channelId).id;
     } catch {
       const config: ChannelConfig = {
         name: channelId,
         fetchMethod: FetchMethod.RSS,
         contentRoot,
       };
-      await this.channelController.addChannel(config);
+      const created = await this.channelController.addChannel(config);
+      return created.id;
     }
   }
 }
