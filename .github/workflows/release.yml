@@ -1,0 +1,46 @@
+name: Release Obsidian plugin
+
+# Builds the plugin and publishes a GitHub release with main.js + manifest.json,
+# which BRAT can install. Trigger by pushing a tag like v0.1.0.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+        with:
+          path: res-obsidian
+
+      # The plugin depends on res-md via file:../res, so check it out alongside.
+      - name: Checkout res-md
+        uses: actions/checkout@v4
+        with:
+          repository: guthriec/res
+          path: res
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install and build
+        working-directory: res-obsidian
+        run: |
+          npm ci
+          npm run build
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            res-obsidian/main.js
+            res-obsidian/manifest.json

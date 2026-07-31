@@ -4,4 +4,6 @@ main.js
 main.js.map
 styles.css
 *.hot-update.js
-res-sync.zip
+
+# local reservoir data
+.res/
