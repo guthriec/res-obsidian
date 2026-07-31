@@ -1,5 +1,5 @@
 import { SyncClient } from "res-md/dist/sync-client";
-import { ChannelControllerImpl } from "res-md/dist/channel-controller";
+import { ChannelControllerImpl, channelDirectorySlug } from "res-md/dist/channel-controller";
 import { FetchMethod } from "res-md/dist/types";
 import type { ChannelConfig } from "res-md/dist/types";
 import { type ResSyncSubscription } from "./types";
@@ -27,8 +27,11 @@ export class SyncService {
       // For vault-root sync we use a stable channel ID "vault-root"
       // with contentRoot: "" so SyncClient writes to the vault root.
       const isRootSync = !sub.localChannelId || sub.localChannelId === ".";
-      const effectiveChannelId = isRootSync ? "vault-root" : sub.localChannelId;
-      const contentRoot = isRootSync ? "" : sub.localPath;
+      // Use the slugged id consistently (res-md slugs channel names), but keep
+      // the raw folder name as the content root so the actual vault folder is
+      // synced (and case is preserved on case-sensitive volumes).
+      const effectiveChannelId = isRootSync ? "vault-root" : channelDirectorySlug(sub.localChannelId);
+      const contentRoot = isRootSync ? "" : (sub.localPath ?? sub.localChannelId);
 
       const actualChannelId = await this.ensureLocalChannel(effectiveChannelId, contentRoot);
       console.log("[res-sync] subscription:", sub.serverChannelId, "→", actualChannelId,
@@ -73,16 +76,22 @@ export class SyncService {
   }
 
   private async ensureLocalChannel(channelId: string, contentRoot?: string): Promise<string> {
+    let channel: ReturnType<typeof this.channelController.viewChannel>;
     try {
-      return this.channelController.viewChannel(channelId).id;
+      channel = this.channelController.viewChannel(channelId);
     } catch {
       const config: ChannelConfig = {
         name: channelId,
         fetchMethod: FetchMethod.RSS,
         contentRoot,
       };
-      const created = await this.channelController.addChannel(config);
-      return created.id;
+      channel = await this.channelController.addChannel(config);
     }
+    // Heal a pre-existing channel whose content root is stale (e.g. created
+    // before content-root preservation), so it syncs the correct folder.
+    if (channel.contentRoot !== contentRoot) {
+      channel = await this.channelController.editChannel(channel.id, { contentRoot });
+    }
+    return channel.id;
   }
 }
