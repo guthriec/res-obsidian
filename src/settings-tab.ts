@@ -53,6 +53,21 @@ export class ResSyncSettingTab extends PluginSettingTab {
           })
       );
 
+    new Setting(containerEl)
+      .setName("Sync deletions")
+      .setDesc(
+        "When enabled, deleting a file on one side deletes it on the other. " +
+          "Destructive — leave off unless you want deletions propagated.",
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.syncDeletions === true)
+          .onChange(async (value) => {
+            this.plugin.settings.syncDeletions = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
     containerEl.createEl("h3", { text: "Server channel subscriptions" });
 
     for (let i = 0; i < this.plugin.settings.subscriptions.length; i++) {

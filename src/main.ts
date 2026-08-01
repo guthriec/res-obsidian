@@ -54,7 +54,7 @@ export default class ResSyncPlugin extends Plugin {
     try {
       console.log("[res-sync] starting sync →", this.settings.serverUrl);
       this.statusBarItem?.setText("Res Sync: starting...");
-      await this.syncService.start(this.settings.serverUrl, this.settings.subscriptions, this.settings.secret);
+      await this.syncService.start(this.settings.serverUrl, this.settings.subscriptions, this.settings.secret, this.settings.syncDeletions);
       this.statusBarItem?.setText("Res Sync: running");
       console.log("[res-sync] sync started successfully");
     } catch (err) {

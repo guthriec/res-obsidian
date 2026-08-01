@@ -19,7 +19,7 @@ export class SyncService {
     return this.running;
   }
 
-  async start(serverUrl: string, subscriptions: ResSyncSubscription[], secret?: string): Promise<void> {
+  async start(serverUrl: string, subscriptions: ResSyncSubscription[], secret?: string, syncDeletions?: boolean): Promise<void> {
     await this.stop();
     console.log("[res-sync] starting", subscriptions.length, "subscriptions →", serverUrl);
 
@@ -42,6 +42,7 @@ export class SyncService {
         serverChannelId: sub.serverChannelId,
         localChannelId: actualChannelId,
         secret,
+        syncDeletions,
       });
 
       this.clients.set(sub.serverChannelId, client);

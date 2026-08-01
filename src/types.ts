@@ -16,6 +16,8 @@ export interface ResSyncSettings {
   secret?: string;
   subscriptions: ResSyncSubscription[];
   syncOnStart: boolean;
+  /** When true, file deletions propagate both ways (destructive — opt-in). */
+  syncDeletions?: boolean;
 }
 
 export const DEFAULT_SETTINGS: ResSyncSettings = {
@@ -23,6 +25,7 @@ export const DEFAULT_SETTINGS: ResSyncSettings = {
   secret: "",
   subscriptions: [],
   syncOnStart: true,
+  syncDeletions: false,
 };
 
 export const VAULT_ROOT_CHANNEL = "." as const;
