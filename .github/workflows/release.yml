@@ -20,11 +20,14 @@ jobs:
         with:
           path: res-obsidian
 
-      # The plugin depends on res-md via file:../res, so check it out alongside.
+      # The plugin depends on res-md via file:../res. Check out the deployment
+      # branch, which carries the plugin-facing features (channelDirectorySlug
+      # export, deletion sync, etc.).
       - name: Checkout res-md
         uses: actions/checkout@v4
         with:
           repository: guthriec/res
+          ref: server-deployment
           path: res
 
       - name: Setup Node
