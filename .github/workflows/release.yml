@@ -32,7 +32,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install and build
+      # The plugin bundles res-md/dist/*, but the res-md checkout is source only
+      # (no built dist/). Build it first so esbuild can resolve the imports.
+      - name: Build res-md dependency
+        working-directory: res
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install and build plugin
         working-directory: res-obsidian
         run: |
           npm ci
