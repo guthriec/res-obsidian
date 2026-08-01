@@ -1,6 +1,6 @@
 {
   "name": "res-obsidian",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Two-way sync Obsidian vault with a res server",
   "main": "main.js",
   "scripts": {
